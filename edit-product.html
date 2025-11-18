@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - Nitya Sales</title>
+    <style>
+        :root { --primary-color: #1a73e8; --light-gray: #f4f7f9; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: var(--light-gray); }
+        .header { background-color: #fff; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; color: var(--primary-color); }
+        .back-link { text-decoration: none; font-weight: 600; color: var(--primary-color); }
+        .container { max-width: 600px; margin: 30px auto; padding: 30px; background-color: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1em; }
+        .save-btn { width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Edit Product</h1>
+        <a href="inventory.html" class="back-link">← Back to Inventory</a>
+    </header>
+
+    <div class="container">
+        <form id="editProductForm">
+            <input type="hidden" id="productId">
+            <div class="form-group">
+                <label for="productName">Product Name</label>
+                <input type="text" id="productName" required>
+            </div>
+            <div class="form-group">
+                <label for="stockQuantity">Stock Quantity</label>
+                <input type="number" id="stockQuantity" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Price (₹)</label>
+                <input type="number" id="price" required>
+            </div>
+            <div class="form-group">
+                <label for="imageUrl">Image URL</label>
+                <input type="text" id="imageUrl">
+            </div>
+            <button type="submit" class="save-btn">Save Changes</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const form = document.getElementById('editProductForm');
+            const productIdField = document.getElementById('productId');
+            const nameField = document.getElementById('productName');
+            const stockField = document.getElementById('stockQuantity');
+            const priceField = document.getElementById('price');
+            const imageField = document.getElementById('imageUrl');
+            
+            // Get product ID from the URL (e.g., edit-product.html?id=5)
+            const params = new URLSearchParams(window.location.search);
+            const productId = params.get('id');
+
+            if (!productId) {
+                alert('No product ID provided!');
+                window.location.href = 'inventory.html';
+                return;
+            }
+
+            // Fetch the product's current data from the backend
+            try {
+                const response = await fetch(`http://localhost:3001/api/products/${productId}`);
+                const product = await response.json();
+
+                // Pre-fill the form with the data
+                productIdField.value = product.id;
+                nameField.value = product.name;
+                stockField.value = product.stock;
+                priceField.value = product.price;
+                imageField.value = product.image_url;
+            } catch (err) {
+                alert('Failed to load product data.');
+            }
+
+            // Handle form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const updatedProduct = {
+                    name: nameField.value,
+                    stock: parseInt(stockField.value),
+                    price: parseFloat(priceField.value),
+                    image_url: imageField.value
+                };
+
+                // Send the updated data to the backend
+                await fetch(`http://localhost:3001/api/products/${productId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedProduct)
+                });
+                
+                alert('Product updated successfully!');
+                window.location.href = 'inventory.html';
+            });
+        });
+    </script>
+</body>
+</html>

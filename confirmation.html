@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Delivery - Nitya Sales</title>
+    <style>
+        :root {
+            --primary-color: #1a73e8; --secondary-color: #28a745;
+            --light-gray: #f4f7f9; --dark-gray: #333; --white: #ffffff;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: var(--light-gray); color: var(--dark-gray); }
+        .header { background-color: var(--white); padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 1.5em; color: var(--primary-color); }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .summary-card, .details-card { background-color: var(--white); border-radius: 8px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        h2 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        #order-summary { list-style-type: none; padding: 0; }
+        #order-summary li { display: flex; justify-content: space-between; padding: 8px 0; }
+        .item-name { font-weight: 600; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1em; }
+        .confirm-btn { width: 100%; padding: 15px; background-color: var(--secondary-color); color: white; border: none; border-radius: 6px; font-size: 1.2em; cursor: pointer; }
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Nitya Sales</h1>
+    </header>
+
+    <div class="container">
+        <div class="summary-card">
+            <h2>Order Summary</h2>
+            <ul id="order-summary">
+                <!-- Items will be loaded here -->
+            </ul>
+        </div>
+        <div class="details-card">
+            <h2>Customer & Delivery Details</h2>
+            <form id="delivery-form">
+                <div class="form-group"><label for="customerName">Customer Name</label><input type="text" id="customerName" required></div>
+                <div class="form-group"><label for="contactNumber">Contact Number</label><input type="tel" id="contactNumber" required></div>
+                <div class="form-group"><label for="deliveryAddress">Delivery Address</label><textarea id="deliveryAddress" rows="4" required></textarea></div>
+                <button type="submit" class="confirm-btn">Confirm & Process Delivery</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const API_URL = 'http://localhost:3001/api';
+            const orderSummaryList = document.getElementById('order-summary');
+            const deliveryForm = document.getElementById('delivery-form');
+            let deliveryCart = [];
+
+            const cartDataString = localStorage.getItem('deliveryCartData');
+            if (cartDataString) {
+                deliveryCart = JSON.parse(cartDataString);
+                deliveryCart.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="item-name">${item.name}</span><span>Qty: ${item.quantity}</span>`;
+                    orderSummaryList.appendChild(li);
+                });
+            }
+            
+            deliveryForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                const orderDetails = {
+                    customerName: document.getElementById('customerName').value,
+                    contactNumber: document.getElementById('contactNumber').value,
+                    deliveryAddress: document.getElementById('deliveryAddress').value,
+                    items: deliveryCart,
+                    orderDate: new Date().toISOString()
+                };
+
+                try {
+                    const response = await fetch(`${API_URL}/orders`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderDetails)
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Order confirmed and is now out for delivery!');
+                        localStorage.removeItem('deliveryCartData');
+                        // --- NEW: Redirect to the delivery page ---
+                        window.location.href = 'delivery.html';
+                    } else {
+                        alert('Error: Could not place order. ' + (result.error || ''));
+                    }
+                } catch (error) {
+                    alert('Error: Could not connect to the server to place the order.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
