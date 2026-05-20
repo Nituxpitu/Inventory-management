@@ -149,4 +149,4 @@ If you want the project to remain private or company-specific, you can keep it w
 
 ## Author
 
-Developed by **Popat Mishra** for **Nitya Sales**.
+Developed by **Nitya Shah** for **Nitya Sales**.
