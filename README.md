@@ -137,16 +137,6 @@ python inventory.py
 - The system is built as a desktop application using Tkinter.
 - It was developed for **Nitya Sales** to make stock and order handling more structured than spreadsheet-based tracking.
 
-## License
-
-This repository currently does not include a license file.
-
-If you want other people to legally reuse, modify, or distribute the code, add a license file before making the repository public.
-
-If you want the project to remain private or company-specific, you can keep it without a public license and mention:
-
-> All rights reserved. Unauthorized reuse is not permitted.
-
 ## Author
 
 Developed by **Nitya Shah** for **Nitya Sales**.
